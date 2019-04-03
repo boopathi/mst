@@ -1,0 +1,41 @@
+<title>Minimum Spanning Tree</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-sizing: border-box;
+  }
+  :root {
+    --fadingTimeout: 100ms;
+  }
+  #status-container {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+  }
+  #status {
+    text-align: center;
+    background: rgba(222, 184, 135, 0.9);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 29px;
+    font-family: sans-serif;
+    color: black;
+    opacity: 0;
+    transition: opacity var(--fadingTimeout) ease-in-out;
+  }
+  #status.active {
+    opacity: 1;
+  }
+</style>
+<canvas id="board"></canvas>
+<div id="status-container"><div id="status"></div></div>
+<script src="main.js"></script>
