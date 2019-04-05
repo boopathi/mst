@@ -1,0 +1,24 @@
+[package]
+name = "mst"
+version = "0.1.0"
+authors = ["Boopathi Rajaa <me@boopathi.in>"]
+description = "Find Minimum Spanning Tree"
+license = "MIT/Apache-2.0"
+homepage = "https://github.com/boopathi/mst"
+repository = "https://github.com/boopathi/mst"
+
+[lib]
+name = "mst"
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[dependencies]
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_derive = "1.0"
+serde_json = "1.0"
+
+
+#name = "mst"
+#[[bin]]
+#path = "src/bin.rs"

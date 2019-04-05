@@ -1,3 +1,4 @@
+import init, { compute_mst } from "./pkg/mst.js";
 const canvas = document.getElementById("board");
 const statusContainer = document.getElementById("status-container");
 const statusBox = document.getElementById("status");
@@ -22,9 +23,10 @@ canvas.setAttribute("height", String(height));
 start();
 
 async function start() {
+  await init("pkg/mst_bg.wasm");
   clear();
 
-  const n = 500;
+  const n = 1000;
   const points = randomPoints(width, height, n);
   await status("Computed random points");
 
@@ -53,18 +55,30 @@ async function start() {
     )}ms] Computing all weighted edges complete`
   );
   const startTime = performance.now();
-  const minimumEdges = mst({
+  const minimumRustEdges = compute_mst({
     nodes: points,
     edges
   });
   const endTime = performance.now();
   await status(
-    `Took ~${Math.floor(
+    `[RUST] Took ~${Math.floor(
       endTime - startTime
     )}ms to compute MST for ${n} nodes with ${edges.length} edges`
   );
 
-  await drawLines(minimumEdges, points);
+  const startJsTime = performance.now();
+  const minimumJsEdges = mst({
+    nodes: points,
+    edges
+  });
+  const endJsTime = performance.now();
+  await status(
+    `[JS] Took ~${Math.floor(
+      endJsTime - startJsTime
+    )}ms to compute MST for ${n} nodes with ${edges.length} edges`
+  );
+
+  await drawLines(minimumRustEdges, points);
   await status("All done", true);
 }
 
