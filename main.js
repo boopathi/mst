@@ -9,6 +9,7 @@ const height = window.innerHeight;
 const backgroundColor = "#263238";
 const pointColor = "#d4bff9";
 const lineColor = "#c6f68d";
+const lineColor2 = "black";
 const fadingTimeout = parseInt(
   getComputedStyle(document.documentElement).getPropertyValue(
     "--fadingTimeout"
@@ -27,7 +28,7 @@ async function start() {
 
   clear();
 
-  const n = 1000;
+  const n = 100;
   const points = randomPoints(width, height, n);
   await status("Computed random points");
 
@@ -93,7 +94,16 @@ async function start() {
     )}ms to compute MST for ${n} nodes with ${edges.length} edges`
   );
 
-  await drawLines(minimumRustEdges, points);
+  await status(
+    `Bright lines are edges computed by Rust. ` +
+      `Black thin lines are edges computed by JS. ` +
+      `They should always overlap each other. ` +
+      `If not, please create an issue`
+  );
+
+  await drawLines(minimumRustEdges, points, lineColor, 5);
+  await drawLines(minimumJsEdges, points, lineColor2, 2);
+
   await status("All done", true);
 }
 
@@ -190,7 +200,13 @@ function union(subsets, x, y) {
   }
 }
 
-async function drawLines(edges, nodes, currentEdge = edges[0]) {
+async function drawLines(
+  edges,
+  nodes,
+  strokeColor = lineColor,
+  strokeWidth = 3,
+  currentEdge = edges[0]
+) {
   if (currentEdge == null) return;
   if (currentEdge.rendered) return;
 
@@ -198,7 +214,9 @@ async function drawLines(edges, nodes, currentEdge = edges[0]) {
     nodes[currentEdge.source][0],
     nodes[currentEdge.source][1],
     nodes[currentEdge.target][0],
-    nodes[currentEdge.target][1]
+    nodes[currentEdge.target][1],
+    strokeWidth,
+    strokeColor
   );
   currentEdge.rendered = true;
   await nextTick(70);
@@ -211,15 +229,19 @@ async function drawLines(edges, nodes, currentEdge = edges[0]) {
       edge.target === currentEdge.target
   );
 
-  await Promise.all(nextEdges.map(edge => drawLines(edges, nodes, edge)));
+  await Promise.all(
+    nextEdges.map(edge =>
+      drawLines(edges, nodes, strokeColor, strokeWidth, edge)
+    )
+  );
 }
 
-function drawLine(x1, y1, x2, y2, size = 2) {
+function drawLine(x1, y1, x2, y2, size = 2, strokeColor = lineColor) {
   ctx.save();
   ctx.beginPath();
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
-  ctx.strokeStyle = lineColor;
+  ctx.strokeStyle = strokeColor;
   ctx.lineWidth = size;
   ctx.stroke();
   ctx.closePath();
