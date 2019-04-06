@@ -4,12 +4,29 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node(i32, i32);
 
+impl Node {
+    pub fn new(x: i32, y: i32) -> Node {
+        Node(x, y)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Edge {
     source: usize,
     target: usize,
     weight: f64,
 }
+
+impl Edge {
+    pub fn new(source: usize, target: usize, weight: f64) -> Edge {
+        Edge {
+            source: source,
+            target: target,
+            weight: weight
+        }
+    }
+}
+
 
 impl PartialEq for Edge {
     fn eq(&self, other: &Edge) -> bool {
@@ -27,6 +44,15 @@ impl PartialOrd for Edge {
 pub struct Graph {
     nodes: Vec<Node>,
     edges: Vec<Edge>,
+}
+
+impl Graph {
+    pub fn new(nodes: Vec<Node>, edges: Vec<Edge>) -> Graph {
+        Graph {
+            nodes: nodes,
+            edges: edges,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

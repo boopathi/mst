@@ -46,24 +46,12 @@ python -m SimpleHTTPServer
 
 ## Findings
 
-As of this writing, there is a significant difference in performance of computation of `mst`(minimum spanning tree) for `n` nodes. The wasm performance is 6x faster than JS. But the transfer of data (`Graph={nodes,edges}`) from JS to use in Rust compiled wasm is huge - It takes more time to pass this and deserialize than to simply run it in JS.
+Rust performs ~3x-4x faster for bigger graphs. For smaller ones, the performance improvement is not worth the effort - `numNodes=100` gives `8ms`(JS) to `6ms`(Rust) improvement.
 
 ```
-[RUST] Took ~563ms to serde deserialize
-[RUST] Took 76.7ms to compute MST
-[RUST] Took ~642ms to compute MST for 1000 nodes with 499500 edges
+[RUST] Took ~137ms to send input, construct Graph in Rust and compute MST for 1000 nodes with 499500 edges and serialize in Rust and deserialize in JS 999 edges
 [JS] Took ~451ms to compute MST for 1000 nodes with 499500 edges
 ```
-
-## Optimization (TODO)
-
-If you're interested in trying out and contributing,
-
-- Reduce the amount of data to serialize/deserialize?
-  - Assume transfer of edges and nodes is mandatory and that edges are not to be computed in rust land.
-- Optimize Rust code?
-  - Avoid unnecessary `clone`s to work around borrow checker
-  - Use Kruskal's parallel algorithm?
 
 ## License
 

@@ -1,4 +1,4 @@
-import init, { compute_mst } from "./pkg/mst.js";
+import init, { JsGraph } from "./pkg/mst.js";
 const canvas = document.getElementById("board");
 const statusContainer = document.getElementById("status-container");
 const statusBox = document.getElementById("status");
@@ -24,9 +24,10 @@ start();
 
 async function start() {
   await init("pkg/mst_bg.wasm");
+
   clear();
 
-  const n = 100;
+  const n = 1000;
   const points = randomPoints(width, height, n);
   await status("Computed random points");
 
@@ -48,24 +49,38 @@ async function start() {
     }
   }
   const edgesEndTime = performance.now();
-
   await status(
     `[~${Math.floor(
       edgesEndTime - edgesStartTime
     )}ms] Computing all weighted edges complete`
   );
-  const startTime = performance.now();
-  const minimumRustEdges = compute_mst({
-    nodes: points,
-    edges
-  });
-  const endTime = performance.now();
+
+  // RUST Compute MST
+  const startRustTime = performance.now();
+  const graph = JsGraph.new();
+  for (const point of points) {
+    graph.add_node(point[0], point[1]);
+  }
+  for (const edge of edges) {
+    graph.add_edge(edge.source, edge.target, edge.weight);
+  }
+  const minimumRustEdges = graph.compute_mst();
+  const endRustTime = performance.now();
+  const overallRustTime = Math.floor(endRustTime - startRustTime);
+
   await status(
-    `[RUST] Took ~${Math.floor(
-      endTime - startTime
-    )}ms to compute MST for ${n} nodes with ${edges.length} edges`
+    `[RUST] Took ~${overallRustTime}ms to send input, construct Graph in Rust and compute MST for ${n} nodes with ${
+      edges.length
+    } edges and serialize in Rust and deserialize in JS ${
+      minimumRustEdges.length
+    } edges`
   );
 
+  // wait for the next rAF to do JS compute
+  // useful in debugging in performance timeline
+  await nextTick();
+
+  // JS Compute MST
   const startJsTime = performance.now();
   const minimumJsEdges = mst({
     nodes: points,
