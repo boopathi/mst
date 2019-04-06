@@ -205,35 +205,65 @@ async function drawLines(
   nodes,
   strokeColor = lineColor,
   strokeWidth = 3,
-  currentEdge = edges[0]
+  currentEdge = edges[0],
+  reversed = false
 ) {
   if (currentEdge == null) return;
   if (currentEdge.rendered) return;
 
-  drawLine(
+  const [x1, y1, x2, y2] = [
     nodes[currentEdge.source][0],
     nodes[currentEdge.source][1],
     nodes[currentEdge.target][0],
-    nodes[currentEdge.target][1],
-    strokeWidth,
-    strokeColor
-  );
+    nodes[currentEdge.target][1]
+  ];
+
+  if (reversed) {
+    await animatedLine(x2, y2, x1, y1, strokeWidth, strokeColor);
+  } else {
+    await animatedLine(x1, y1, x2, y2, strokeWidth, strokeColor);
+  }
+
   currentEdge.rendered = true;
-  await nextTick(70);
+  // await nextTick(70);
 
-  const nextEdges = edges.filter(
+  const nextSourceEdges = edges.filter(
     edge =>
-      edge.source === currentEdge.target ||
-      edge.target === currentEdge.source ||
-      edge.source === currentEdge.source ||
-      edge.target === currentEdge.target
+      edge.source === currentEdge.target || edge.source === currentEdge.source
   );
 
-  await Promise.all(
-    nextEdges.map(edge =>
-      drawLines(edges, nodes, strokeColor, strokeWidth, edge)
-    )
+  const nextTargetEdges = edges.filter(
+    edge =>
+      edge.target === currentEdge.source || edge.target === currentEdge.target
   );
+
+  await Promise.all([
+    ...nextSourceEdges.map(edge =>
+      drawLines(edges, nodes, strokeColor, strokeWidth, edge)
+    ),
+    ...nextTargetEdges.map(edge =>
+      drawLines(edges, nodes, strokeColor, strokeWidth, edge, true)
+    )
+  ]);
+}
+
+async function animatedLine(x1, y1, x2, y2, size = 2, strokeColor = lineColor) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const wayPoints = [];
+  const dist = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+  const div = dist / 10;
+  for (let i = 0; i < div; i++) {
+    const tx = x1 + (dx * i) / div;
+    const ty = y1 + (dy * i) / div;
+    wayPoints.push([tx, ty]);
+  }
+  wayPoints.push([x2, y2]);
+
+  for (let i = 0; i < wayPoints.length; i++) {
+    drawLine(x1, y1, wayPoints[i][0], wayPoints[i][1], size, strokeColor);
+    await nextTick();
+  }
 }
 
 function drawLine(x1, y1, x2, y2, size = 2, strokeColor = lineColor) {
