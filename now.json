@@ -1,6 +1,7 @@
 {
   "version": 2,
   "name": "mst",
+  "alias": "mst.boopathi.in",
   "builds": [
     {
       "src": "build.sh",

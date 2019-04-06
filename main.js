@@ -26,7 +26,7 @@ async function start() {
   await init("pkg/mst_bg.wasm");
   clear();
 
-  const n = 1000;
+  const n = 100;
   const points = randomPoints(width, height, n);
   await status("Computed random points");
 
